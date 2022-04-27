@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.43667555, g: 0.48427182, b: 0.5645241, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1024,6 +1024,7 @@ GameObject:
   - component: {fileID: 999103402}
   - component: {fileID: 999103401}
   - component: {fileID: 999103400}
+  - component: {fileID: 999103403}
   m_Layer: 8
   m_Name: PlayerMananger
   m_TagString: Untagged
@@ -1188,6 +1189,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: -90}
+--- !u!114 &999103403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999103399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54142f91564b84f039e65a09083d4ebc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1053136111 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224430082593979480, guid: 1089cd182513bfd40a70df0e8a7bb04e, type: 3}
@@ -1681,6 +1694,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1449075149}
     m_Modifications:
+    - target: {fileID: 114585058863479998, guid: 309d134149d4e0c41a1b7792ef17a737, type: 3}
+      propertyPath: m_Text
+      value: 5000
+      objectReference: {fileID: 0}
     - target: {fileID: 224247082073107618, guid: 309d134149d4e0c41a1b7792ef17a737, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

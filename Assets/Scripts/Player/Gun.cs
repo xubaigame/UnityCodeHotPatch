@@ -74,8 +74,8 @@ public class Gun : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        gold = 1000;
-        diamands = 1000;
+        gold = 5;
+        diamands = 5;   
         level = 2;
         bullectAudio = GetComponent<AudioSource>();
     }
@@ -128,7 +128,9 @@ public class Gun : MonoBehaviour
 
         if (attackCD >= 1 - gunLevel * 0.3)
         {
+            float time = Time.realtimeSinceStartup;
             Attack();
+            Debug.Log("Attack 函数执行时间：" + (Time.realtimeSinceStartup - time));
             attack = true;
         }
         else
