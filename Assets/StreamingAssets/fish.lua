@@ -4,8 +4,7 @@
 --- DateTime: 2022/4/27 20:03
 ---
 
-local Instatiate = CS.UnityEngine.GameObject.Instantiate
-
+local UnityEngine = CS.UnityEngine
 xlua.hotfix(CS.Treasour,'CreatePrize',function(self)
     for i = 1, 4 do
         local go = Instatiate(self.gold,self.transform.position + CS.UnityEngine.Vector3(-10 + i*100,0,0),self.transform.rotation)
@@ -19,11 +18,18 @@ xlua.private_accessible(CS.Gun)
 
 xlua.hotfix(CS.Gun,'Attack',function(self)
 
-    if self.gold < 1 + (self.gunLevel - 1) * 2 then
+    if self.gunLevel == 3 and self.diamands <3 then
+        return
+    elseif self.gold < 1 + (self.gunLevel - 1) * 2 then
         return
     end
     
     if CS.UnityEngine.Input.GetMouseButtonDown(0) then
+        
+        if CS.UnityEngine.EventSystems.EventSystem.current:IsPointerOverGameObject() then
+            return
+        end
+        
         self.bullectAudio.clip = self.bullectAudios[self.gunLevel - 1];
         self.bullectAudio:Play();
         if self.Butterfly then
@@ -33,9 +39,189 @@ xlua.hotfix(CS.Gun,'Attack',function(self)
         CS.UnityEngine.GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation);
 
         if not self.canShootForFree then
-            self:GoldChange(-1 - (self.gunLevel - 1) * 2)
+            if self.gunLevel == 3 then
+                self:DiamandsChange(-3)
+            else
+                self:GoldChange(-1 - (self.gunLevel - 1) * 2)
+            end
         end
         self.attackCD = 0
         self.attack = false
     end
+end)
+
+local util = require 'util'
+util.hotfix_ex(CS.Gun,'GoldChange',function(self , number)
+    self:GoldChange(number)
+    if self.gold < 0 then
+        self.gold = 0
+    end
+end)
+
+util.hotfix_ex(CS.Gun,'DiamandsChange',function(self, number)
+    self:DiamandsChange(number)
+    if self.diamands < 0 then
+        self.diamands = 0
+    end
+end)
+
+
+xlua.private_accessible(CS.Ice)
+xlua.hotfix(CS.Ice,'Start',function(self)
+    self.reduceDiamands = 5;
+end)
+
+xlua.private_accessible(CS.Fire)
+xlua.hotfix(CS.Fire,'Start',function(self)
+    self.reduceDiamands = 8;
+end)
+
+xlua.private_accessible(CS.ButterFly)
+xlua.hotfix(CS.ButterFly,'Start',function(self)
+    self.reduceDiamands = 8;
+end)
+
+util.hotfix_ex(CS.Boss,'Start',function(self)
+    self:Start()
+    self.m_reduceGold = self.m_reduceGold - 20
+end)
+
+util.hotfix_ex(CS.DeffendBoss,'Start',function(self)
+    self:Start()
+    self.m_reduceGold = self.m_reduceGold - 30
+end)
+
+util.hotfix_ex(CS.InvisibleBoss,'Start',function(self)
+    self:Start()
+    self.m_reduceDiamond = self.m_reduceDiamond - 5
+end)
+
+xlua.private_accessible(CS.CreateFish)
+xlua.hotfix(CS.CreateFish,'Update',function(self)
+    --鱼群的生成
+    self:CreateALotOfFish();
+
+    if self.ItemtimeVal>=0.5 then
+        --位置随机数
+        self.num =CS.UnityEngine.Mathf.Floor(CS.UnityEngine.Random.Range(0, 4))
+        --游戏物体随机数
+        self.ItemNum =CS.UnityEngine.Mathf.Floor(CS.UnityEngine.Random.Range(1, 101))
+    
+        local halfLength=self.fishList.Length/2
+    
+        local littlefishTypeIndex=CS.UnityEngine.Mathf.Floor(CS.UnityEngine.Random.Range(0,halfLength))
+    
+        local bigfishTypeIndex=CS.UnityEngine.Mathf.Floor(CS.UnityEngine.Random.Range(halfLength,self.fishList.Length))
+    
+        local itemTypeIndex=CS.UnityEngine.Mathf.Floor(CS.UnityEngine.Random.Range(0,self.item.Length))
+
+        --产生气泡
+        if self.ItemNum<20 then
+    
+            self:CreateGameObject(self.item[3])
+    
+        elseif  self.ItemNum <= 42 then
+            for i=0,2,1 do
+            self:CreateGameObject(self.fishList[littlefishTypeIndex])
+            end
+            self:CreateGameObject(self.item[itemTypeIndex])
+    
+        elseif self.ItemNum >= 43 and self.ItemNum < 72 then
+            for i=0,1,1 do
+            self:CreateGameObject(self.fishList[bigfishTypeIndex])
+        end
+            self:CreateGameObject(self.item[itemTypeIndex])
+    
+        elseif self.ItemNum >= 84 and self.ItemNum < 86 then
+    
+            self:CreateGameObject(self.boss)
+            
+        elseif self.ItemNum >= 87 and self.ItemNum <= 88 then
+    
+            self:CreateGameObject(self.boss2)
+            
+        elseif self.ItemNum==100 then
+            
+            self:CreateGameObject(self.boss3)
+    
+        else
+    
+            self:CreateGameObject(self.item[0]);
+    
+        end
+        
+        self.ItemtimeVal = 0
+        
+    else
+        self.ItemtimeVal =self.ItemtimeVal+CS.UnityEngine.Time.deltaTime;
+    end
+
+end)
+
+xlua.private_accessible(CS.Fish)
+xlua.hotfix(CS.Fish,'TakeDamage',function(self,attackValue)
+
+    if UnityEngine.Gun.Instance.Fire then
+
+        attackValue=attackValue*2;
+
+    end
+    local catchValue=UnityEngine.Mathf.Floor(UnityEngine.Random.Range(0,100))
+    if catchValue<=(50-(self.hp-attackValue))/2 then
+
+        self.isDead = true
+        for i=0,8,1 do
+            UnityEngine.GameObject.Instantiate(self.pao, self.transform.position, UnityEngine.Quaternion.Euler(self.transform.eulerAngles + UnityEngine.Vector3(0, 45 * i, 0)))
+        end
+
+        self.gameObjectAni:SetTrigger("Die")
+        self:Invoke("Prize", 0.7)
+    end
+end)
+
+xlua.hotfix(CS.Boss,'TakeDamage',function(self,attackValue)
+    if UnityEngine.Gun.Instance.Fire then
+
+        attackValue=attackValue*2;
+    end
+
+    local catchValue=UnityEngine.Mathf.Floor(UnityEngine.Random.Range(0,100))
+    if catchValue<=(attackValue*3-self.hp/10) then
+
+        UnityEngine.GameObject.Instantiate(self.deadEeffect, self.transform.position, self.transform.rotation)
+        CS.Gun.Instance:GoldChange(self.GetGold * 10)
+        CS.Gun.Instance:DiamandsChange(self.GetDiamands * 10)
+
+        for i=0,10,1 do
+
+            local itemGo =UnityEngine.GameObject.Instantiate(self.gold, self.transform.position, UnityEngine.Quaternion.Euler(self.transform.eulerAngles + UnityEngine.Vector3(0, 18 + 36 * (i - 1), 0)))
+            itemGo:GetComponent('Gold').bossPrize = true
+        end
+        for i=0,10,1 do
+
+            local itemGo1 =UnityEngine.GameObject.Instantiate(self.diamands,self.transform.position, UnityEngine.Quaternion.Euler(self.transform.eulerAngles + UnityEngine.Vector3(0, 36 + 36 * (i - 1), 0)))
+            itemGo1:GetComponent('Gold').bossPrize = true
+        end
+        UnityEngine.Object.Destroy(self.gameObject)
+
+    end
+end)
+
+xlua.hotfix(CS.Gun,'RotateGun',function(self)
+    if UnityEngine.Input.GetKey(UnityEngine.KeyCode.A) then
+        self.transform:Rotate(UnityEngine.Vector3.forward * self.rotateSpeed)
+    elseif UnityEngine.Input.GetKey(UnityEngine.KeyCode.D) then
+        self.transform:Rotate(-UnityEngine.Vector3.forward * self.rotateSpeed)
+    end
+    self:ClampAngle()
+end)
+
+xlua.private_accessible(CS.GunImage)
+xlua.hotfix(CS.GunImage,'RotateGun',function(self)
+    if UnityEngine.Input.GetKey(UnityEngine.KeyCode.A) then
+        self.transform:Rotate(UnityEngine.Vector3.forward * self.rotateSpeed)
+    elseif UnityEngine.Input.GetKey(UnityEngine.KeyCode.D) then
+        self.transform:Rotate(-UnityEngine.Vector3.forward * self.rotateSpeed)
+    end
+    self:ClampAngle()
 end)

@@ -13,13 +13,25 @@ public static class HotfixCfg
     {
         typeof(GameObject),
         typeof(Treasour),
-        typeof(Gun)
+        typeof(Gun),
+        typeof(Ice),
+        typeof(Fire),
+        typeof(ButterFly),
+        typeof(Boss),
+        typeof(DeffendBoss),
+        typeof(InvisibleBoss),
+        typeof(CreateFish),
+        typeof(Fish),
+        typeof(GunImage)
     };
     
     [LuaCallCSharp]
     public static List<Type> by_luacallsharp = new List<Type>()
     {
-        typeof(Gun)
+        typeof(Gun),
+        typeof(Boss),
+        typeof(DeffendBoss),
+        typeof(InvisibleBoss)
     };
     
 }
